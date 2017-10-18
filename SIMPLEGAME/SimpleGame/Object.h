@@ -1,25 +1,18 @@
 #pragma once
 class Object
 {
-	char name[50];
-	int hp;
-	int mp;
-	int power;
-	int speed;
-	int m_x, m_y;
-	int m_vX, m_vY;
-
 public:
-	Object();
-	Object(float x, float y) {
-		m_x = x;
-		m_y = y;
-	};
-	
+	Object(float x, float y);
 	~Object();
 
-	void update();
+	void Update();
 
+	float m_x;
+	float m_y;
+	float m_vX;
+	float m_vY;
 
+	float m_size;
+	float m_color[4];
 };
 
