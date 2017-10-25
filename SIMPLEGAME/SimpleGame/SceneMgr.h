@@ -1,22 +1,34 @@
 #pragma once
+#include <cstdlib>
+#include <iostream>
+
+#include "Renderer.h"
 #include "Object.h"
 
-#define MAX_OBJECT_COUNT 1000
+#define MAX_OBJECT_COUNT 50000
+
 class SceneMgr
 {
 public:
-	SceneMgr();
+	SceneMgr(int width, int height);
 	~SceneMgr();
 
-
-
-	int AddActorObject();
+	int AddActorObject(float x, float y);
+	void DeleteActorObject(int index);
 	void UpdateAllActorObjects();
-	//void DeleteActorObject(int index);
 	Object* GetActorObject(int index);
-	//int GetMaxObjectCount();
+	int GetMaxObjectCount();
+	void DrawAllObjects();
 
 private:
-	Object * m_Objects[MAX_OBJECT_COUNT];
+	bool BoxBoxCollisionTest(float minX, float minY, float maxX, float maxY, float minX1, float minY1, float maxX1, float maxY1);
+	void DoCollisionTest();
+	Object *m_actorObjects[MAX_OBJECT_COUNT];
+	Object *m_bulletObjects[MAX_OBJECT_COUNT];
+
+	Renderer *m_renderer;
+
+	int m_windowWidth;
+	int m_windowHeight;
 };
 

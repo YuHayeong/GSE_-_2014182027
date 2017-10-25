@@ -9,63 +9,69 @@ but WITHOUT ANY WARRANTY.
 */
 
 #include "stdafx.h"
+
+#include "SceneMgr.h"
+#include "Object.h"
+
 #include <iostream>
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
-#include "Renderer.h"
+SceneMgr *g_SceneMgr = NULL;
 
-#include "Object.h"
-
-Renderer *g_Renderer = NULL;
-Object *g_Object = NULL;
+bool g_LButtonDown = false;
 
 void RenderScene(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	// Renderer Test
-	g_Renderer->DrawSolidRect(
-		g_Object->m_x, 
-		g_Object->m_y,
-		0, 
-		g_Object->m_size,
-		g_Object->m_color[0],
-		g_Object->m_color[1],
-		g_Object->m_color[2],
-		g_Object->m_color[3]
-	);
-
-	g_Object->Update();
+	g_SceneMgr->UpdateAllActorObjects();
+	g_SceneMgr->DrawAllObjects();
+	
 	glutSwapBuffers();
 }
 
 void Idle(void)
 {
 	RenderScene();
-	g_Object->Update();
 }
 
 //button
-//GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON,GLUT_RIGHT_BUTTON
+//GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON
 //state
 //GLUT_UP, GLUT_DOWN
-
 void MouseInput(int button, int state, int x, int y)
 {
-	//if (button == GLUT_LEFT_BUTTON&&state == GLUT_DOWN) {
-	//	g_LButtonDoin = true;
-	//}
-	//if (button == GLUT_LEFT_BUTTON&&state == GLUT_UP) {
-	//	//clicked
-	//	//범위체크
-	//	
-	//
-	//}
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		g_LButtonDown = true;
+	}
 
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+	{
+		if (g_LButtonDown)
+		{
+			//clicked
+			//for (int i = 0; i < 100; i++)
+			//	g_SceneMgr->AddActorObject(x-250, -y+250);
+		}
+		g_LButtonDown = false;
+	}
 
+	RenderScene();
+}
 
+void MotionInput(int x, int y)
+{
+	if (g_LButtonDown)
+	{
+		//clicked
+		for (int i = 0; i < 100; i++)
+		{
+			//g_SceneMgr->AddActorObject(x - 250, -y + 250);
+		}
+	}
 	RenderScene();
 }
 
@@ -98,25 +104,25 @@ int main(int argc, char **argv)
 		std::cout << "GLEW 3.0 not supported\n ";
 	}
 
-	// Initialize Renderer
-	g_Renderer = new Renderer(500, 500);
-	if (!g_Renderer->IsInitialized())
-	{
-		std::cout << "Renderer could not be initialized.. \n";
-	}
-
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
 	glutKeyboardFunc(KeyInput);
+	glutMotionFunc(MotionInput);
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
 
-	g_Object = new Object(0, 0);
+	g_SceneMgr = new SceneMgr(500, 500);
+	for (int i = 0; i < 50; i++)
+	{			
+		float x = 250.f * 2.f * ((float)std::rand()/(float)RAND_MAX - 0.5f);
+		float y = 250.f * 2.f * ((float)std::rand()/(float)RAND_MAX - 0.5f);
+
+		g_SceneMgr->AddActorObject(x, y);
+	}
 
 	glutMainLoop();
 
-	delete g_Renderer;
-	delete g_Object;
+	delete g_SceneMgr;
 
     return 0;
 }

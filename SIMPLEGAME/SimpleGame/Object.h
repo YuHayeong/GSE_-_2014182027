@@ -1,9 +1,13 @@
 #pragma once
+#include <cstdlib>
+
 class Object
 {
 public:
 	Object(float x, float y);
 	~Object();
+
+	float GetLife();
 
 	void Update();
 
@@ -14,5 +18,7 @@ public:
 
 	float m_size;
 	float m_color[4];
+
+	float m_life;
 };
 
