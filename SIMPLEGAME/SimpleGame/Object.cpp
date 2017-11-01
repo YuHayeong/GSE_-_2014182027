@@ -7,8 +7,8 @@ Object::Object(float x, float y)
 {
 	m_x = x;
 	m_y = y;
-	m_vX = 4.f*(((float)std::rand() / (float)RAND_MAX) - 0.5f);
-	m_vY = 4.f*(((float)std::rand() / (float)RAND_MAX) - 0.5f);
+	m_vX = 200.f *(((float)std::rand() / (float)RAND_MAX) - 0.5f);
+	m_vY = 200.f *(((float)std::rand() / (float)RAND_MAX) - 0.5f);
 
 	m_size = 10;
 	m_color[0] = 1;
@@ -16,7 +16,8 @@ Object::Object(float x, float y)
 	m_color[2] = 1;
 	m_color[3] = 1;
 
-	m_life = 100;
+	m_life = 1000.f;
+	//m_lifeTime = 10000000.f;
 }
 
 
@@ -25,16 +26,12 @@ Object::~Object()
 	
 }
 
-void Object::Update()
+void Object::Update(float elapsedTime)
 {
-	float elapsedTime = 1.5f;
-	m_x = m_x + m_vX * elapsedTime;
-	m_y= m_y + m_vY * elapsedTime;
+	float elapsedTimeInSecond = elapsedTime / 100.f;
 
-	//m_size = 30.f * (sin(m_x)+1)/2;
-	//m_color[0] = cos(m_x);
-	//m_color[1] = cos(m_x);
-	//m_color[3] = cos(3.141592f*0.5*((10.f-m_life) / 10.f));
+	m_x = m_x + m_vX * elapsedTimeInSecond;
+	m_y= m_y + m_vY * elapsedTimeInSecond;
 
 	if (m_x > 250)
 	{
@@ -58,11 +55,21 @@ void Object::Update()
 
 	if (m_life > 0.f)
 	{
-		//m_life -= 0.5f;
+		m_life -= 0.1f;
 	}
+
+	/*if (m_lifeTime > 0.f)
+	{
+		m_lifeTime -= elapsedTimeInSecond;
+	}*/
 }
 
 float Object::GetLife()
 {
 	return m_life;
 }
+//
+//float Object::GetLifeTime()
+//{
+//	return m_lifeTime;
+//}

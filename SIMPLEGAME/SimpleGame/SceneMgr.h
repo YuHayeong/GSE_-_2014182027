@@ -5,7 +5,7 @@
 #include "Renderer.h"
 #include "Object.h"
 
-#define MAX_OBJECT_COUNT 50000
+#define MAX_OBJECT_COUNT 100
 
 class SceneMgr
 {
@@ -15,7 +15,7 @@ public:
 
 	int AddActorObject(float x, float y);
 	void DeleteActorObject(int index);
-	void UpdateAllActorObjects();
+	void UpdateAllActorObjects(float elapsedTime);
 	Object* GetActorObject(int index);
 	int GetMaxObjectCount();
 	void DrawAllObjects();

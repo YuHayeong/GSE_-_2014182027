@@ -74,7 +74,7 @@ void SceneMgr::DeleteActorObject(int index)
 	}
 }
 
-void SceneMgr::UpdateAllActorObjects()
+void SceneMgr::UpdateAllActorObjects(float elapsedTime)
 {
 	DoCollisionTest();
 
@@ -90,12 +90,12 @@ void SceneMgr::UpdateAllActorObjects()
 			}
 			else
 			{
-				m_actorObjects[i]->Update();
+				m_actorObjects[i]->Update(elapsedTime);
 			}
 		}
 		if (m_bulletObjects[i] != NULL)
 		{
-			m_bulletObjects[i]->Update();
+			m_bulletObjects[i]->Update(elapsedTime);
 		}
 	}
 }

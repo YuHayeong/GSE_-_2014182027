@@ -8,8 +8,9 @@ public:
 	~Object();
 
 	float GetLife();
-
-	void Update();
+//	float GetLifeTime();
+	
+	void Update(float elapsedTime);
 
 	float m_x;
 	float m_y;
