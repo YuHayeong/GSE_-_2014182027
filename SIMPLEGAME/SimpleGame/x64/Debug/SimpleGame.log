@@ -1,0 +1,5 @@
+﻿  SceneMgr.cpp
+c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\scenemgr.cpp(28): warning C4305: '인수': 'double'에서 'float'(으)로 잘립니다.
+c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\scenemgr.cpp(28): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  SimpleGame.vcxproj -> C:\Users\lante\Desktop\수업\게임소프트웨어공학\SimpleGame\GSE_2_2014182027\SIMPLEGAME\x64\Debug\SimpleGame.exe
+  SimpleGame.vcxproj -> C:\Users\lante\Desktop\수업\게임소프트웨어공학\SimpleGame\GSE_2_2014182027\SIMPLEGAME\x64\Debug\SimpleGame.pdb (Partial PDB)

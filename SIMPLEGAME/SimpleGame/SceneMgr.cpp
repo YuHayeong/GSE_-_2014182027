@@ -23,7 +23,10 @@ SceneMgr::SceneMgr(int width, int height)
 
 void SceneMgr::DrawAllObjects()
 {
+	m_texCharacter = m_renderer->CreatePngTexture("./Textures/simpsons.png");
+	m_renderer->DrawTexturedRect( 0, 0, 0, 50, 0,0, 1, 1, m_texCharacter);
 	m_renderer->DrawSolidRect(0, 0,	0, m_windowWidth, 0, 0, 0, 0.4);
+	
 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
