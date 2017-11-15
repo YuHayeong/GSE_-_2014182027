@@ -21,18 +21,16 @@ SceneMgr::SceneMgr(int width, int height)
 	}
 }
 
+int g_temp = 0;
+
 void SceneMgr::DrawAllObjects()
 {
-	m_texCharacter = m_renderer->CreatePngTexture("./Textures/simpsons.png");
-	m_renderer->DrawTexturedRect( 0, 0, 0, 50, 0,0, 1, 1, m_texCharacter);
 	m_renderer->DrawSolidRect(0, 0,	0, m_windowWidth, 0, 0, 0, 0.4);
-	
 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
 		if (m_actorObjects[i] != NULL)
 		{
-			// Renderer Test
 			m_renderer->DrawSolidRect(
 				m_actorObjects[i]->m_x,
 				m_actorObjects[i]->m_y,
@@ -51,14 +49,14 @@ SceneMgr::~SceneMgr()
 {
 }
 
-int SceneMgr::AddActorObject(float x, float y)
+int SceneMgr::AddActorObject(float x, float y, int type)
 {
 	//Find empty slot
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
 		if (m_actorObjects[i] == NULL)
 		{
-			m_actorObjects[i] = new Object(x, y);
+			m_actorObjects[i] = new Object(x, y, type);
 			return i;
 		}
 	}
@@ -85,15 +83,30 @@ void SceneMgr::UpdateAllActorObjects(float elapsedTime)
 	{
 		if (m_actorObjects[i] != NULL)
 		{
-			if (m_actorObjects[i]->GetLife() < 0.0001f)
+			if (m_actorObjects[i]->GetLife() < 0.0001f || m_actorObjects[i]->GetLifeTime() < 0.0001f)
 			{
-				//kill object
 				delete m_actorObjects[i];
 				m_actorObjects[i] = NULL;
 			}
 			else
 			{
 				m_actorObjects[i]->Update(elapsedTime);
+				if (m_actorObjects[i]->GetType() == OBJECT_BUILDING)
+				{
+					//fire bullet
+					if (m_actorObjects[i]->m_lastBullet > 0.5f)
+					{
+						int bulletID = AddActorObject(
+							m_actorObjects[i]->m_x,
+							m_actorObjects[i]->m_y,
+							OBJECT_BULLET);
+						m_actorObjects[i]->m_lastBullet = 0.f;
+						if (bulletID >= 0)
+						{
+							m_actorObjects[bulletID]->m_parentID = i;
+						}
+					}
+				}
 			}
 		}
 		if (m_bulletObjects[i] != NULL)
@@ -122,12 +135,9 @@ void SceneMgr::DoCollisionTest()
 		collisionCount = 0;
 		if (m_actorObjects[i] != NULL)
 		{
-			for (int j = 0; j < MAX_OBJECT_COUNT; j++)
+			for (int j = i+1; j < MAX_OBJECT_COUNT; j++)
 			{
-				if (i == j)
-					continue;
-
-				if (m_actorObjects[j] != NULL)
+				if (m_actorObjects[j] != NULL && m_actorObjects[i] != NULL)
 				{
 					float minX, minY;
 					float maxX, maxY;
@@ -143,25 +153,69 @@ void SceneMgr::DoCollisionTest()
 					minY1 = m_actorObjects[j]->m_y - m_actorObjects[j]->m_size / 2.f;
 					maxX1 = m_actorObjects[j]->m_x + m_actorObjects[j]->m_size / 2.f;
 					maxY1 = m_actorObjects[j]->m_y + m_actorObjects[j]->m_size / 2.f;
+
 					if (BoxBoxCollisionTest(minX, minY, maxX, maxY, minX1, minY1, maxX1, maxY1))
 					{
-						collisionCount++;
+						if (
+							(m_actorObjects[i]->GetType() == OBJECT_BUILDING)
+							&&
+							(m_actorObjects[j]->GetType() == OBJECT_CHARACTER)
+							)
+						{
+							m_actorObjects[i]->SetDamage(m_actorObjects[j]->GetLife());
+							m_actorObjects[j]->m_life = 0.f;
+							collisionCount++;
+						}
+						else if (
+							(m_actorObjects[j]->GetType() == OBJECT_BUILDING)
+							&&
+							(m_actorObjects[i]->GetType() == OBJECT_CHARACTER)
+							)
+						{
+							m_actorObjects[j]->SetDamage(m_actorObjects[i]->GetLife());
+							m_actorObjects[i]->m_life = 0.f;
+							collisionCount++;
+						}else if (
+							(m_actorObjects[i]->GetType() == OBJECT_CHARACTER)
+							&&
+							(m_actorObjects[j]->GetType() == OBJECT_BULLET)
+							)
+						{
+							m_actorObjects[i]->SetDamage(m_actorObjects[j]->GetLife());
+							m_actorObjects[j]->m_life = 0.f;
+						}
+						else if (
+							(m_actorObjects[j]->GetType() == OBJECT_CHARACTER)
+							&&
+							(m_actorObjects[i]->GetType() == OBJECT_BULLET)
+							)
+						{
+							m_actorObjects[j]->SetDamage(m_actorObjects[i]->GetLife());
+							m_actorObjects[i]->m_life = 0.f;
+						}
 					}
 				}
 			}
-			if (collisionCount > 0)
+
+			if ( collisionCount > 0 )
 			{
-				m_actorObjects[i]->m_color[0] = 1;
-				m_actorObjects[i]->m_color[1] = 0;
-				m_actorObjects[i]->m_color[2] = 0;
-				m_actorObjects[i]->m_color[3] = 1;
+				if (m_actorObjects[i] != NULL && m_actorObjects[i]->GetType() == OBJECT_BUILDING)
+				{
+					m_actorObjects[i]->m_color[0] = 1;
+					m_actorObjects[i]->m_color[1] = 0;
+					m_actorObjects[i]->m_color[2] = 0;
+					m_actorObjects[i]->m_color[3] = 1;
+				}
 			}
 			else
 			{
-				m_actorObjects[i]->m_color[0] = 1;
-				m_actorObjects[i]->m_color[1] = 1;
-				m_actorObjects[i]->m_color[2] = 1;
-				m_actorObjects[i]->m_color[3] = 1;
+				if (m_actorObjects[i] != NULL && m_actorObjects[i]->GetType() == OBJECT_BUILDING)
+				{
+					m_actorObjects[i]->m_color[0] = 1;
+					m_actorObjects[i]->m_color[1] = 1;
+					m_actorObjects[i]->m_color[2] = 0;
+					m_actorObjects[i]->m_color[3] = 1;
+				}
 			}
 		}
 	}

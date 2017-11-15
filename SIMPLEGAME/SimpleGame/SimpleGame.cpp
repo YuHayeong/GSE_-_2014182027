@@ -27,7 +27,7 @@ bool g_LButtonDown = false;
 void RenderScene(void)
 {
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 	
 	DWORD currTime = timeGetTime();
 	DWORD elapsedTime = currTime - g_prevTime;
@@ -59,10 +59,9 @@ void MouseInput(int button, int state, int x, int y)
 	{
 		if (g_LButtonDown)
 		{
-
+			//clicked
 			for (int i = 0; i < 1; i++)
-				g_SceneMgr->AddActorObject(0, 0);
-
+				g_SceneMgr->AddActorObject(x-250, -y+400, OBJECT_CHARACTER);
 		}
 		g_LButtonDown = false;
 	}
@@ -70,15 +69,14 @@ void MouseInput(int button, int state, int x, int y)
 	RenderScene();
 }
 
-
 void MotionInput(int x, int y)
 {
 	if (g_LButtonDown)
 	{
 		//clicked
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 1; i++)
 		{
-			//g_SceneMgr->AddActorObject(x - 250, -y + 250);
+			//g_SceneMgr->AddActorObject(x - 250, -y + 250, OBJECT_CHARACTER);
 		}
 	}
 	RenderScene();
@@ -100,11 +98,8 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(500, 800);
 	glutCreateWindow("Game Software Engineering KPU");
-
-
-	
 
 	glewInit();
 	if (glewIsSupported("GL_VERSION_3_0"))
@@ -123,15 +118,15 @@ int main(int argc, char **argv)
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
 
-	g_SceneMgr = new SceneMgr(500, 500);
-	/*for (int i = 0; i < 200; i++)
-	{			
-		float x = 250.f * 2.f * ((float)std::rand()/(float)RAND_MAX - 0.5f);
-		float y = 250.f * 2.f * ((float)std::rand()/(float)RAND_MAX - 0.5f);
+	g_SceneMgr = new SceneMgr(500, 800);
 
-		g_SceneMgr->AddActorObject(x, y);
-	}*/
+	g_SceneMgr->AddActorObject(-150, 200, OBJECT_BUILDING);
+	g_SceneMgr->AddActorObject(0, 200, OBJECT_BUILDING);
+	g_SceneMgr->AddActorObject(150, 200, OBJECT_BUILDING);
 
+	g_SceneMgr->AddActorObject(-150, -200, OBJECT_BUILDING2);
+	g_SceneMgr->AddActorObject(0, -200, OBJECT_BUILDING2);
+	g_SceneMgr->AddActorObject(150, -200, OBJECT_BUILDING2);
 	g_prevTime = timeGetTime();
 
 	glutMainLoop();
