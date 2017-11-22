@@ -10,7 +10,8 @@
 #define OBJECT_CHARACTER 0
 #define OBJECT_BUILDING 11
 #define OBJECT_BUILDING2 12
-#define OBJECT_BULLET 2
+#define OBJECT_BULLET 21
+#define OBJECT_BULLET2 22
 #define OBJECT_ARROW 3
 
 class SceneMgr

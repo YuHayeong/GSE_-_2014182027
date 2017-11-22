@@ -19,7 +19,7 @@ Object::Object(float x, float y, int type)
 	if (type == OBJECT_BUILDING)
 	{
 		m_color[0] = 1;
-		m_color[1] = 1;
+		m_color[1] = 0;
 		m_color[2] = 0;
 		m_color[3] = 1;
 
@@ -35,9 +35,9 @@ Object::Object(float x, float y, int type)
 	}
 	if (type == OBJECT_BUILDING2)
 	{
-		m_color[0] = 1;
+		m_color[0] = 0;
 		m_color[1] = 0;
-		m_color[2] = 0;
+		m_color[2] = 1;
 		m_color[3] = 1;
 
 		m_vX = 0;
@@ -52,8 +52,8 @@ Object::Object(float x, float y, int type)
 	}
 	else if (type == OBJECT_CHARACTER)
 	{
-		m_color[0] = 1;
-		m_color[1] = 1;
+		m_color[0] = 0;
+		m_color[1] = 0;
 		m_color[2] = 1;
 		m_color[3] = 1; 
 		
@@ -74,6 +74,21 @@ Object::Object(float x, float y, int type)
 
 		m_vX = 600 *(((float)std::rand() / (float)RAND_MAX) - 0.5f);
 		m_vY = 600 *(((float)std::rand() / (float)RAND_MAX) - 0.5f);
+
+		m_size = 2;
+		m_life = 20;
+
+		m_lifeTime = 100000;
+	}
+	else if (type == OBJECT_BULLET2)
+	{
+		m_color[0] = 0;
+		m_color[1] = 0;
+		m_color[2] = 1;
+		m_color[3] = 1;
+
+		m_vX = 600 * (((float)std::rand() / (float)RAND_MAX) - 0.5f);
+		m_vY = 600 * (((float)std::rand() / (float)RAND_MAX) - 0.5f);
 
 		m_size = 2;
 		m_life = 20;

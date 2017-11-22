@@ -25,7 +25,7 @@ int g_temp = 0;
 
 void SceneMgr::DrawAllObjects()
 {
-	m_renderer->DrawSolidRect(0, 0,	0, m_windowWidth, 0, 0, 0, 0.4);
+	
 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
