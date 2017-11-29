@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "Renderer.h"
+#include "LoadPng.h"
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
 	Initialize(windowSizeX, windowSizeY);
+
 }
 
 
@@ -19,9 +21,17 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
-
+	m_SolidRectXYShader = CompileShaders("./Shaders/SolidRectXY.vs", "./Shaders/SolidRectXY.fs");
+	m_SolidRectGaugeShader = CompileShaders("./Shaders/SolidRectGauge.vs", "./Shaders/SolidRectGauge.fs");
+	m_SolidRectWithTextureShader = CompileShaders("./Shaders/SolidRectWithTexture.vs", "./Shaders/SolidRectWithTexture.fs");
+	m_SolidRectWithTextureSeqShader = CompileShaders("./Shaders/SolidRectWithTextureSeq.vs", "./Shaders/SolidRectWithTextureSeq.fs");
+	m_ParticleWithTextureShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
+	
 	//Create VBOs
 	CreateVertexBufferObjects();
+
+	//Initialize settings
+	glViewport(0, 0, m_WindowSizeX, m_WindowSizeY);
 
 	if (m_SolidRectShader > 0 && m_VBORect > 0)
 	{
@@ -32,6 +42,26 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 bool Renderer::IsInitialized()
 {
 	return m_Initialized;
+}
+
+GLuint Renderer::CreatePngTexture(char * filePath)
+{
+
+	GLuint temp;
+	glGenTextures(1, &temp);
+
+	//Load Pngs
+	// Load file and decode image.
+	std::vector<unsigned char> image;
+	unsigned width, height;
+	unsigned error = lodepng::decode(image, width, height, filePath);
+
+	glBindTexture(GL_TEXTURE_2D, temp);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
+
+	return temp;
 }
 
 void Renderer::DeleteTexture(GLuint textureID)
@@ -70,6 +100,181 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBORectTex);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectTex);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rectTex), rectTex, GL_STATIC_DRAW);
+
+	float rectBorder[]
+		=
+	{
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,
+		-1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f,
+		1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 
+		1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,
+	};
+
+	glGenBuffers(1, &m_VBORectBorder);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectBorder);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rectBorder), rectBorder, GL_STATIC_DRAW);
+
+	CreateParticleVBO();
+}
+
+void Renderer::CreateParticleVBO()
+{
+	int particleCount = m_ParticleCount;
+	float particleSize = 1.f / m_WindowSizeX;
+	float particleInitPosX = 0.0f;
+	float particleInitPosY = 0.0f;
+
+	float* particleVertices = new float[particleCount * 2 * 3 * (3 + 2 + 4)];
+	int particleFloatCount = particleCount * 2 * 3 * (3 + 2 + 4);
+	m_ParticleVertexCount = particleCount * 2 * 3;
+
+	int particleVertIndex = 0;
+
+	for (int i = 0; i < particleCount; i++)
+	{
+		float randomValueX = 0.f;
+		float randomValueY = 0.f;
+		float randomValueZ = 0.f;
+		float randomStartTime = 0.f;
+		float velocityScale = 0.5f;
+		float randomSize = 1.f;
+
+		randomValueX = (rand() / (float)RAND_MAX - 0.5)*velocityScale;
+		randomValueY = (rand() / (float)RAND_MAX - 0.5)*velocityScale;
+		randomValueZ = 0.f;
+		randomStartTime = (rand() / (float)RAND_MAX)*20.f;
+		randomSize = (rand() / (float)RAND_MAX)*3.f;
+
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosX; 
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosY;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosX;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosY;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosX;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosY;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosX;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosY;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosX;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosY;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosX;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = particleSize / 2.f + particleInitPosY;
+		particleVertices[particleVertIndex] *= randomSize;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 0.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = 1.f;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueX;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueY;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomValueZ;
+		particleVertIndex++;
+		particleVertices[particleVertIndex] = randomStartTime;
+		particleVertIndex++;
+	}
+
+	glGenBuffers(1, &m_VBOParticles);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*particleFloatCount, particleVertices, GL_STATIC_DRAW);
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -182,22 +387,30 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	return ShaderProgram;
 }
 
-void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
+void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a, float level)
 {
 	float newX, newY;
 
 	GetGLPosition(x, y, &newX, &newY);
 
+	GLuint shader = m_SolidRectShader;
+
 	//Program select
-	glUseProgram(m_SolidRectShader);
+	glUseProgram(shader);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), newX, newY, 0, size);
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), r, g, b, a);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	
+	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, 0, size);
+	glUniform4f(glGetUniformLocation(shader, "u_Color"), r, g, b, a);
+	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
 
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	
+	
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
@@ -205,12 +418,333 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(attribPosition);
+}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+void Renderer::DrawSolidRectXY(float x, float y, float z, float width, float height, float r, float g, float b, float a, float level)
+{
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	GLuint shader = m_SolidRectXYShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, width, height);
+	glUniform4f(glGetUniformLocation(shader, "u_Color"), r, g, b, a);
+	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+}
+
+void Renderer::DrawSolidRectGauge(float x, float y, float z, float width, float height, float r, float g, float b, float a, float gauge, float level)
+{
+	DrawBorderXY(x, y, z, width, height, 1, 1, 1, 0.5, level);
+
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	GLuint shader = m_SolidRectGaugeShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
+	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
+	GLuint u_Gauge = glGetUniformLocation(shader, "u_Gauge");
+	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
+
+	glUniform4f(u_Trans, newX, newY, width, height);
+	glUniform4f(u_Color, r, g, b, a);
+	glUniform1f(u_Gauge, gauge);
+
+	GLuint attribPosition = glGetAttribLocation(shader, "a_Position");
+	GLuint attribTexPosition = glGetAttribLocation(shader, "a_TexPosition");
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTexPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectTex);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+	
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTexPosition);
+}
+
+void Renderer::DrawBorderXY(float x, float y, float z, float width, float height, float r, float g, float b, float a, float level)
+{
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	GLuint shader = m_SolidRectXYShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, width, height);
+	glUniform4f(glGetUniformLocation(shader, "u_Color"), r, g, b, a);
+	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectBorder);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+	glDisableVertexAttribArray(attribPosition);
+}
+
+void Renderer::DrawTexturedRect(float x, float y, float z, float size, float r, float g, float b, float a, GLuint texID, float level)
+{
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	GLuint shader = m_SolidRectWithTextureShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
+	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
+	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
+
+	glUniform4f(u_Trans, newX, newY, 0, size);
+	glUniform4f(u_Color, r, g, b, a);
+
+	GLuint attribPosition = glGetAttribLocation(shader, "a_Position");
+	GLuint attribTexPosition = glGetAttribLocation(shader, "a_TexPosition");
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTexPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectTex);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texID);
+	GLuint u_Texture = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(u_Texture, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTexPosition);
+}
+
+void Renderer::DrawTexturedRectSeq(float x, float y, float z, float size, float r, float g, float b, float a, GLuint texID, int currSeqX, int currSeqY, int totalSeqX, int totalSeqY, float level)
+{
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	GLuint shader = m_SolidRectWithTextureSeqShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
+	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
+	GLuint u_TotalSeqX = glGetUniformLocation(shader, "u_TotalSeqX");
+	GLuint u_TotalSeqY = glGetUniformLocation(shader, "u_TotalSeqY");
+	GLuint u_CurrSeqX = glGetUniformLocation(shader, "u_CurrSeqX");
+	GLuint u_CurrSeqY = glGetUniformLocation(shader, "u_CurrSeqY");
+	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
+
+	glUniform4f(u_Trans, newX, newY, 0, size);
+	glUniform4f(u_Color, r, g, b, a);
+	glUniform1f(u_TotalSeqX, (float)totalSeqX);
+	glUniform1f(u_CurrSeqX, (float)currSeqX);
+	glUniform1f(u_TotalSeqY, (float)totalSeqY);
+	glUniform1f(u_CurrSeqY, (float)currSeqY);
+
+	GLuint attribPosition = glGetAttribLocation(shader, "a_Position");
+	GLuint attribTexPosition = glGetAttribLocation(shader, "a_TexPosition");
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTexPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectTex);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texID);
+	GLuint u_Texture = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(u_Texture, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTexPosition);
+}
+
+void Renderer::DrawParticle(float x, float y, float z, float size, float r, float g, float b, float a, float gDirX, float gDirY, GLuint texID, float timeInSeconds)
+{
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	GLuint shader = m_ParticleWithTextureShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	//Enable alpha blend
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	int attribTexPos = glGetAttribLocation(shader, "a_TexPos");
+	int attribVelocity = glGetAttribLocation(shader, "a_Velocity");
+
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTexPos);
+	glEnableVertexAttribArray(attribVelocity);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
+
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, 0);
+	glVertexAttribPointer(attribTexPos, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(attribVelocity, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 5));
+
+	GLuint uniformElapsedTime = glGetUniformLocation(shader, "u_ElapsedTime");
+	GLuint uniformTexture = glGetUniformLocation(shader, "u_Texture");
+	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
+	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
+	GLuint u_TrailDir = glGetUniformLocation(shader, "u_TrailDir");
+
+	glUniform1f(uniformElapsedTime, timeInSeconds);
+	glUniform1i(uniformTexture, 0);
+	glUniform4f(u_Trans, newX, newY, 0, size);
+	glUniform4f(u_Color, r, g, b, a);
+	glUniform3f(u_TrailDir, gDirX, gDirY, 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVertexCount);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTexPos);
+	glDisableVertexAttribArray(attribVelocity);
 }
 
 void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
 {
 	*newX = x * 2.f / m_WindowSizeX;
 	*newY = y * 2.f / m_WindowSizeY;
+}
+
+unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight, bool flipY) 
+{
+	printf("Reading image %s\n", imagepath);
+	outWidth = -1;
+	outHeight = -1;
+	// Data read from the header of the BMP file
+	unsigned char header[54];
+	unsigned int dataPos;
+	unsigned int imageSize;
+	// Actual RGB data
+	unsigned char * data;
+
+	// Open the file
+	FILE * file;
+	fopen_s(&file, imagepath, "rb");
+	if (!file) { printf("Image could not be opened\n"); return NULL; }
+
+	// Read the header, i.e. the 54 first bytes
+
+	// If less than 54 byes are read, problem
+	if (fread(header, 1, 54, file) != 54) {
+		printf("Not a correct BMP file\n");
+		return NULL;
+	}
+	// A BMP files always begins with "BM"
+	if (header[0] != 'B' || header[1] != 'M') {
+		printf("Not a correct BMP file\n");
+		return NULL;
+	}
+	// Make sure this is a 24bpp file
+	if (*(int*)&(header[0x1E]) != 0) { printf("Not a correct BMP file\n");    return NULL; }
+	if (*(int*)&(header[0x1C]) != 24) { printf("Not a correct BMP file\n");    return NULL; }
+
+	// Read the information about the image
+	dataPos = *(int*)&(header[0x0A]);
+	imageSize = *(int*)&(header[0x22]);
+	outWidth = *(int*)&(header[0x12]);
+	outHeight = *(int*)&(header[0x16]);
+
+	// Some BMP files are misformatted, guess missing information
+	if (imageSize == 0)    imageSize = outWidth*outHeight * 3; // 3 : one byte for each Red, Green and Blue component
+	if (dataPos == 0)      dataPos = 54; // The BMP header is done that way
+
+										 // Create a buffer
+	data = new unsigned char[imageSize];
+
+	// Read the actual data from the file into the buffer
+	fread(data, 1, imageSize, file);
+
+	// Everything is in memory now, the file wan be closed
+	fclose(file);
+
+	if (flipY) {
+		// swap y-axis
+		unsigned char * tmpBuffer = new unsigned char[outWidth * 3];
+		int size = outWidth * 3;
+		for (int i = 0; i<outHeight / 2; i++) {
+			// copy row i to tmp
+			memcpy_s(tmpBuffer, size, data + outWidth * 3 * i, size);
+			// copy row h-i-1 to i
+			memcpy_s(data + outWidth * 3 * i, size, data + outWidth * 3 * (outHeight - i - 1), size);
+			// copy tmp to row h-i-1
+			memcpy_s(data + outWidth * 3 * (outHeight - i - 1), size, tmpBuffer, size);
+		}
+		delete[] tmpBuffer;
+	}
+
+	return data;
 }

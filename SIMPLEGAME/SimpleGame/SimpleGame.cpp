@@ -28,7 +28,7 @@ void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClearDepth(0.f);
+	glClearDepth(1.f);
 	DWORD currTime = timeGetTime();
 	DWORD elapsedTime = currTime - g_prevTime;
 	g_prevTime = currTime;
@@ -120,7 +120,8 @@ int main(int argc, char **argv)
 
 	g_SceneMgr = new SceneMgr(500, 800);
 
-	g_SceneMgr->AddActorObject(-150, 200, OBJECT_BUILDING);
+	//m_renderer->DrawTexturedRect(150,200, OBJECT_BUILDING, m_texCharacter);
+
 	g_SceneMgr->AddActorObject(0, 200, OBJECT_BUILDING);
 	g_SceneMgr->AddActorObject(150, 200, OBJECT_BUILDING);
 

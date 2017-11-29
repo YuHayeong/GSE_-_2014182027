@@ -13,7 +13,7 @@ SceneMgr::SceneMgr(int width, int height)
 
 	m_windowWidth = width;
 	m_windowHeight = height;
-
+	m_texCharacter = m_renderer->CreatePngTexture("./Textures/simpsons.png");
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
 		m_actorObjects[i] = NULL;
@@ -39,7 +39,8 @@ void SceneMgr::DrawAllObjects()
 				m_actorObjects[i]->m_color[0],
 				m_actorObjects[i]->m_color[1],
 				m_actorObjects[i]->m_color[2],
-				m_actorObjects[i]->m_color[3]
+				m_actorObjects[i]->m_color[3],
+				0
 			);
 		}
 	}

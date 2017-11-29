@@ -34,8 +34,9 @@ private:
 	Object *m_bulletObjects[MAX_OBJECT_COUNT];
 
 	Renderer *m_renderer;
-	int m_texCharacter;
 	int m_windowWidth;
 	int m_windowHeight;
+	int m_texCharacter;
+
 };
 
