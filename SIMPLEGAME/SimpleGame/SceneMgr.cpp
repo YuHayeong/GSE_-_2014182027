@@ -6,6 +6,11 @@ SceneMgr::SceneMgr(int width, int height)
 	// Initialize Renderer
 	m_renderer = new Renderer(width, height);
 
+	Sound *m_sound;
+	m_sound = new Sound();
+	int soundBG = m_sound->CreateSound("./Dependencies/SoundSamples/MF-W-90.XM");
+	m_sound->PlaySound(soundBG, true, 0.2f);
+	
 	if (!m_renderer->IsInitialized())
 	{
 		std::cout << "SceneMgr::Renderer could not be initialized.. \n";

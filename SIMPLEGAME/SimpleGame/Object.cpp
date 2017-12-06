@@ -3,6 +3,7 @@
 #include "SceneMgr.h"
 #include <math.h>
 
+#define  GLUT_BITMAP_9_BY_15
 
 Object::Object(float x, float y, int type)
 {
@@ -13,7 +14,6 @@ Object::Object(float x, float y, int type)
 
 	m_lastBullet = 0;
 	m_lastArrow = 0;
-
 	m_parentID = -1;
 
 	if (type == OBJECT_BUILDING)
@@ -30,6 +30,7 @@ Object::Object(float x, float y, int type)
 		m_life = 500;
 
 		m_lifeTime = 100000;	
+		
 
 		
 	}
@@ -47,7 +48,7 @@ Object::Object(float x, float y, int type)
 		m_life = 500;
 
 		m_lifeTime = 100000;
-
+		
 
 	}
 	else if (type == OBJECT_CHARACTER)

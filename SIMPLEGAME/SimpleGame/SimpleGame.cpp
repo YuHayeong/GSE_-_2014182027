@@ -9,6 +9,7 @@ but WITHOUT ANY WARRANTY.
 */
 
 #include "stdafx.h"
+#include "Sound.h"
 #include "windows.h"
 
 #include "SceneMgr.h"
@@ -92,6 +93,7 @@ void SpecialKeyInput(int key, int x, int y)
 	RenderScene();
 }
 
+
 int main(int argc, char **argv)
 {
 	// Initialize GL things
@@ -100,6 +102,7 @@ int main(int argc, char **argv)
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(500, 800);
 	glutCreateWindow("Game Software Engineering KPU");
+	
 
 	glewInit();
 	if (glewIsSupported("GL_VERSION_3_0"))
@@ -122,6 +125,7 @@ int main(int argc, char **argv)
 
 	//m_renderer->DrawTexturedRect(150,200, OBJECT_BUILDING, m_texCharacter);
 
+	g_SceneMgr->AddActorObject(-150, 200, OBJECT_BUILDING);
 	g_SceneMgr->AddActorObject(0, 200, OBJECT_BUILDING);
 	g_SceneMgr->AddActorObject(150, 200, OBJECT_BUILDING);
 
@@ -129,6 +133,8 @@ int main(int argc, char **argv)
 	g_SceneMgr->AddActorObject(0, -200, OBJECT_BUILDING2);
 	g_SceneMgr->AddActorObject(150, -200, OBJECT_BUILDING2);
 	g_prevTime = timeGetTime();
+
+	
 
 	glutMainLoop();
 

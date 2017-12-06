@@ -29,7 +29,7 @@ public:
 
 	float m_lastBullet;
 	float m_lastArrow;
-
 	int m_parentID;
+
 };
 
