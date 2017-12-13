@@ -1,13 +1,18 @@
-﻿  Sound.cpp
+﻿  SceneMgr.cpp
+  Renderer.cpp
+c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\renderer.cpp(257): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\renderer.cpp(258): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\renderer.cpp(558): warning C4267: '=': 'size_t'에서 'GLint'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\renderer.cpp(1118): warning C4244: '인수': 'float'에서 'GLint'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\renderer.cpp(1194): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
   코드를 생성하고 있습니다...
   컴파일하고 있습니다...
+  SimpleGame.cpp
+c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\simplegame.cpp(65): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Object.cpp
 c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\object.cpp(6): warning C4005: 'GLUT_BITMAP_9_BY_15': 매크로 재정의
   c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\dependencies\freeglut_std.h(205): note: 'GLUT_BITMAP_9_BY_15'의 이전 정의를 참조하십시오.
 c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\object.cpp(61): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 c:\users\lante\desktop\수업\게임소프트웨어공학\simplegame\gse_2_2014182027\simplegame\simplegame\object.cpp(62): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   코드를 생성하고 있습니다...
-  건너뛰고 있습니다... (관련된 변경 내용 없음)
-  SimpleGame.cpp
-  SceneMgr.cpp
   SimpleGame.vcxproj -> C:\Users\lante\Desktop\수업\게임소프트웨어공학\SimpleGame\GSE_2_2014182027\SIMPLEGAME\x64\Debug\SimpleGame.exe
